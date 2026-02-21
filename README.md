@@ -15,15 +15,15 @@ Version 1.0.3 — Compatible Kali Linux · Ubuntu · Debian
 ---
 
 ## Nouveautés v1.0.3
-- ✅ Installation robuste (Kali, Ubuntu, Debian)
-- ✅ **Autocomplétion bash native** (`sc`+Tab → `scan`, `n`+Tab → `network`)
-- ✅ Scans **persistants** sur disque (`~/.netguard/scans.json`)
-- ✅ `report list` — liste tous les scans passés
-- ✅ `report show <id>` — ré-affiche un rapport
-- ✅ `report export <id>` — exporte en TXT/JSON/HTML
-- ✅ `analyze <id>` — fonctionne avec les scans sauvegardés
-- ✅ `config` — validation des valeurs, affichage tabulaire
-- ✅ Module `--sysctl` pour l'audit des paramètres kernel
+- Installation robuste (Kali, Ubuntu, Debian)
+- Autocomplétion bash native (`sc`+Tab → `scan`, `n`+Tab → `network`)
+- Scans persistants sur disque (`~/.netguard/scans.json`)
+- `report list` — liste tous les scans passés
+- `report show <id>` — ré-affiche un rapport
+- `report export <id>` — exporte en TXT/JSON/HTML
+- `analyze <id>` — fonctionne avec les scans sauvegardés
+- `config` — validation des valeurs, affichage tabulaire
+- Module `--sysctl` pour l'audit des paramètres kernel
 
 ---
 
@@ -39,7 +39,7 @@ L'installer gère automatiquement :
 - L'autocomplétion bash dans `/etc/bash_completion.d/netguard`
 - La config dans `~/.netguard/`
 
-**Après installation :**
+Après installation :
 ```bash
 source ~/.bashrc   # ou ouvrir un nouveau terminal
 netguard           # → banner + aide complète
@@ -127,6 +127,6 @@ netguard/
 
 ## ⚠️ Avertissement légal
 
-NetGuard est un outil **pédagogique et défensif**.  
-Ne l'utilisez **que sur des systèmes que vous possédez** ou êtes autorisé à tester.  
+NetGuard est un outil pédagogique et défensif.  
+Ne l'utilisez que sur des systèmes que vous possédez ou êtes autorisé à tester.  
 Toute utilisation non autorisée est illégale.
