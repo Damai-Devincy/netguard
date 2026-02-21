@@ -1,0 +1,85 @@
+"""NetGuard v1.0.3 — Base de vulnérabilités"""
+
+PORT_VULNS = {
+    21:    {"service":"FTP",          "severity":"CRITIQUE","cve":"CVE-1999-0497", "description":"FTP transmet identifiants et données en clair","recommendation":"Désactiver FTP, utiliser SFTP","command":"sudo systemctl disable --now vsftpd"},
+    22:    {"service":"SSH",          "severity":"MOYEN",   "cve":None,            "description":"SSH exposé — vérifier config (clés, root login)","recommendation":"Désactiver auth mot de passe, imposer les clés","command":"sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"},
+    23:    {"service":"Telnet",       "severity":"CRITIQUE","cve":"CVE-1999-0619", "description":"Telnet : protocole non chiffré","recommendation":"Désactiver Telnet, utiliser SSH","command":"sudo systemctl disable --now telnet"},
+    25:    {"service":"SMTP",         "severity":"ÉLEVÉ",   "cve":None,            "description":"SMTP exposé — relay ouvert, spoofing","recommendation":"Restreindre SMTP, configurer SPF/DKIM","command":"sudo ufw deny 25/tcp"},
+    53:    {"service":"DNS",          "severity":"MOYEN",   "cve":None,            "description":"DNS exposé — transfert de zone non restreint","recommendation":"Restreindre les transferts de zone","command":"sudo ufw deny 53/tcp"},
+    69:    {"service":"TFTP",         "severity":"CRITIQUE","cve":"CVE-2009-0397", "description":"TFTP — transfert sans authentification","recommendation":"Désactiver TFTP","command":"sudo systemctl disable --now tftpd"},
+    80:    {"service":"HTTP",         "severity":"MOYEN",   "cve":None,            "description":"HTTP sans chiffrement","recommendation":"Migrer vers HTTPS","command":"sudo certbot --apache"},
+    110:   {"service":"POP3",         "severity":"ÉLEVÉ",   "cve":None,            "description":"POP3 non chiffré","recommendation":"Utiliser POP3S (port 995)","command":"sudo ufw deny 110/tcp"},
+    111:   {"service":"RPCbind",      "severity":"ÉLEVÉ",   "cve":"CVE-2010-2064", "description":"RPCbind — vecteur NFS/mountd","recommendation":"Bloquer RPCbind","command":"sudo ufw deny 111"},
+    135:   {"service":"MS-RPC",       "severity":"ÉLEVÉ",   "cve":"CVE-2003-0352", "description":"RPC Windows exposé","recommendation":"Bloquer via pare-feu","command":"sudo ufw deny 135/tcp"},
+    139:   {"service":"NetBIOS",      "severity":"ÉLEVÉ",   "cve":None,            "description":"NetBIOS — partage réseau, énumération","recommendation":"Désactiver si inutilisé","command":"sudo ufw deny 139/tcp"},
+    143:   {"service":"IMAP",         "severity":"ÉLEVÉ",   "cve":None,            "description":"IMAP non chiffré","recommendation":"Utiliser IMAPS (port 993)","command":"sudo ufw deny 143/tcp"},
+    161:   {"service":"SNMP",         "severity":"ÉLEVÉ",   "cve":"CVE-2002-0013", "description":"SNMP v1/v2 — community 'public' par défaut","recommendation":"Passer à SNMPv3","command":"sudo ufw deny 161/udp"},
+    389:   {"service":"LDAP",         "severity":"ÉLEVÉ",   "cve":None,            "description":"LDAP non chiffré","recommendation":"Utiliser LDAPS (636)","command":"sudo ufw deny 389/tcp"},
+    443:   {"service":"HTTPS",        "severity":"FAIBLE",  "cve":None,            "description":"HTTPS — vérifier TLS, certificat","recommendation":"TLS 1.2+ uniquement","command":"openssl s_client -connect localhost:443 2>&1 | grep Protocol"},
+    445:   {"service":"SMB",          "severity":"CRITIQUE","cve":"CVE-2017-0144", "description":"SMB — EternalBlue, WannaCry, PrintNightmare","recommendation":"Bloquer SMB publiquement","command":"sudo ufw deny 445/tcp"},
+    512:   {"service":"rexec",        "severity":"CRITIQUE","cve":None,            "description":"Remote exec non chiffré","recommendation":"Désactiver rexec","command":"sudo systemctl disable --now rexec"},
+    513:   {"service":"rlogin",       "severity":"CRITIQUE","cve":None,            "description":"Remote login non sécurisé","recommendation":"Désactiver rlogin","command":"sudo systemctl disable --now rlogin"},
+    514:   {"service":"rsh/syslog",   "severity":"ÉLEVÉ",   "cve":None,            "description":"Remote shell ou syslog UDP","recommendation":"Désactiver rsh","command":"sudo ufw deny 514"},
+    873:   {"service":"rsync",        "severity":"ÉLEVÉ",   "cve":"CVE-2007-6200", "description":"rsync exposé — accès fichiers","recommendation":"Restreindre rsync","command":"sudo ufw deny 873/tcp"},
+    1433:  {"service":"MSSQL",        "severity":"ÉLEVÉ",   "cve":None,            "description":"SQL Server exposé","recommendation":"Ne jamais exposer SQL Server","command":"sudo ufw deny 1433/tcp"},
+    2375:  {"service":"Docker API",   "severity":"CRITIQUE","cve":"CVE-2019-5736", "description":"Docker daemon sans TLS — accès root total","recommendation":"Jamais exposer Docker sans TLS","command":"sudo ufw deny 2375/tcp"},
+    2376:  {"service":"Docker TLS",   "severity":"MOYEN",   "cve":None,            "description":"Docker API TLS — vérifier certificats","recommendation":"Vérifier les accès","command":"sudo ufw limit 2376/tcp"},
+    3306:  {"service":"MySQL",        "severity":"ÉLEVÉ",   "cve":None,            "description":"MySQL accessible depuis l'extérieur","recommendation":"Restreindre à 127.0.0.1","command":"sudo sed -i 's/^bind-address.*/bind-address = 127.0.0.1/' /etc/mysql/mysql.conf.d/mysqld.cnf && sudo systemctl restart mysql"},
+    3389:  {"service":"RDP",          "severity":"CRITIQUE","cve":"CVE-2019-0708", "description":"Bureau à distance — BlueKeep, force brute","recommendation":"Désactiver RDP ou VPN+NLA","command":"sudo ufw deny 3389/tcp"},
+    4444:  {"service":"Backdoor/MSF", "severity":"CRITIQUE","cve":None,            "description":"Port 4444 — souvent Metasploit ou backdoor","recommendation":"Vérifier quel processus utilise ce port","command":"sudo ss -tlnp | grep 4444 && sudo lsof -i:4444"},
+    5432:  {"service":"PostgreSQL",   "severity":"ÉLEVÉ",   "cve":None,            "description":"PostgreSQL exposé","recommendation":"Restreindre à localhost","command":"sudo sed -i \"s/listen_addresses = '*'/listen_addresses = 'localhost'/\" /etc/postgresql/*/main/postgresql.conf"},
+    5900:  {"service":"VNC",          "severity":"CRITIQUE","cve":"CVE-2006-2369", "description":"VNC exposé — accès graphique non chiffré","recommendation":"Tunneler VNC via SSH","command":"sudo ufw deny 5900/tcp"},
+    6379:  {"service":"Redis",        "severity":"CRITIQUE","cve":"CVE-2022-0543", "description":"Redis sans auth — exécution OS possible","recommendation":"requirepass + bind 127.0.0.1","command":"sudo sed -i 's/# requirepass .*/requirepass STRONG_PASS/' /etc/redis/redis.conf && sudo systemctl restart redis"},
+    8080:  {"service":"HTTP-Alt",     "severity":"MOYEN",   "cve":None,            "description":"Port HTTP alternatif — admin souvent exposé","recommendation":"Sécuriser ou bloquer","command":"sudo ufw deny 8080/tcp"},
+    8443:  {"service":"HTTPS-Alt",    "severity":"FAIBLE",  "cve":None,            "description":"HTTPS alternatif — vérifier certificats TLS","recommendation":"Vérifier validité du certificat","command":"openssl s_client -connect localhost:8443 2>&1 | grep Protocol"},
+    9200:  {"service":"Elasticsearch","severity":"CRITIQUE","cve":"CVE-2015-1427", "description":"Elasticsearch sans auth par défaut","recommendation":"Activer X-Pack Security","command":"sudo ufw deny 9200/tcp"},
+    9300:  {"service":"ES-cluster",   "severity":"ÉLEVÉ",   "cve":None,            "description":"Clustering Elasticsearch exposé","recommendation":"Bloquer interfaces publiques","command":"sudo ufw deny 9300/tcp"},
+    10250: {"service":"Kubelet API",  "severity":"CRITIQUE","cve":"CVE-2018-1002105","description":"Kubelet — exécution dans les pods possible","recommendation":"Restreindre l'accès","command":"sudo ufw deny 10250/tcp"},
+    27017: {"service":"MongoDB",      "severity":"CRITIQUE","cve":"CVE-2017-15535","description":"MongoDB sans auth par défaut","recommendation":"Activer auth, bind à localhost","command":"sudo sed -i '/net:/a\\  bindIp: 127.0.0.1' /etc/mongod.conf && sudo systemctl restart mongod"},
+}
+
+SENSITIVE_FILES = [
+    ("/etc/passwd",           "644","FAIBLE",  "Utilisateurs système"),
+    ("/etc/shadow",           "640","CRITIQUE","Mots de passe hashés"),
+    ("/etc/sudoers",          "440","ÉLEVÉ",   "Règles sudo"),
+    ("/etc/ssh/sshd_config",  "600","MOYEN",   "Config SSH"),
+    ("/root/.ssh/authorized_keys","600","ÉLEVÉ","Clés SSH root"),
+    ("/etc/crontab",          "644","MOYEN",   "Crontab système"),
+    ("/etc/hosts",            "644","FAIBLE",  "Fichier hosts"),
+    ("/etc/hosts.allow",      "644","MOYEN",   "TCP Wrappers allow"),
+    ("/etc/hosts.deny",       "644","MOYEN",   "TCP Wrappers deny"),
+    ("/var/log/auth.log",     "640","MOYEN",   "Logs d'authentification"),
+]
+
+DANGEROUS_SERVICES = {
+    "telnet":    ("CRITIQUE","Protocole non chiffré — remplacer par SSH"),
+    "vsftpd":   ("CRITIQUE","FTP non chiffré"),
+    "proftpd":  ("CRITIQUE","FTP non chiffré"),
+    "pure-ftpd":("CRITIQUE","FTP non chiffré"),
+    "rsh":      ("CRITIQUE","Remote shell non sécurisé"),
+    "rlogin":   ("CRITIQUE","Remote login non sécurisé"),
+    "rexec":    ("CRITIQUE","Remote exec non sécurisé"),
+    "finger":   ("ÉLEVÉ",   "Expose des infos sur les utilisateurs"),
+    "snmpd":    ("MOYEN",   "SNMP — vérifier community string"),
+    "nfs-server":("MOYEN",  "NFS — vérifier les exports"),
+    "rpcbind":  ("MOYEN",   "RPC Portmapper exposé"),
+    "avahi-daemon":("FAIBLE","mDNS — expose des services LAN"),
+}
+
+SSH_DANGEROUS_PARAMS = {
+    r"^\s*PermitRootLogin\s+yes":        ("CRITIQUE","Connexion SSH root directe autorisée"),
+    r"^\s*PermitEmptyPasswords\s+yes":   ("CRITIQUE","Mots de passe vides autorisés"),
+    r"^\s*PasswordAuthentication\s+yes": ("ÉLEVÉ",   "Auth par mot de passe active"),
+    r"^\s*X11Forwarding\s+yes":          ("MOYEN",   "Forwarding X11 activé"),
+    r"^\s*Protocol\s+1":                 ("CRITIQUE","SSHv1 activé — protocole obsolète"),
+    r"^\s*StrictModes\s+no":             ("ÉLEVÉ",   "StrictModes désactivé"),
+    r"^\s*MaxAuthTries\s+[6-9]":         ("MOYEN",   "Trop de tentatives d'auth"),
+}
+
+SYSTEM_CHECKS = [
+    {"name":"IPv4 Forwarding", "cmd":["sysctl","net.ipv4.ip_forward"],                  "bad":"1","severity":"MOYEN", "description":"IPv4 forwarding activé","recommendation":"Désactiver si pas routeur","fix":"sudo sysctl -w net.ipv4.ip_forward=0"},
+    {"name":"ICMP Redirects",  "cmd":["sysctl","net.ipv4.conf.all.accept_redirects"],   "bad":"1","severity":"MOYEN", "description":"Redirections ICMP acceptées","recommendation":"Désactiver","fix":"sudo sysctl -w net.ipv4.conf.all.accept_redirects=0"},
+    {"name":"Source Routing",  "cmd":["sysctl","net.ipv4.conf.all.accept_source_route"],"bad":"1","severity":"ÉLEVÉ", "description":"Source routing accepté","recommendation":"Désactiver","fix":"sudo sysctl -w net.ipv4.conf.all.accept_source_route=0"},
+    {"name":"SYN Cookies",     "cmd":["sysctl","net.ipv4.tcp_syncookies"],               "bad":"0","severity":"MOYEN", "description":"SYN cookies désactivés","recommendation":"Activer","fix":"sudo sysctl -w net.ipv4.tcp_syncookies=1"},
+    {"name":"SUID Core Dumps", "cmd":["sysctl","fs.suid_dumpable"],                      "bad":"1","severity":"MOYEN", "description":"Core dumps SUID activés","recommendation":"Désactiver","fix":"sudo sysctl -w fs.suid_dumpable=0"},
+]
