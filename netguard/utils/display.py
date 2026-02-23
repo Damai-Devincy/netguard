@@ -31,7 +31,7 @@ def banner():
         print(f"{C.CYAN}{C.BOLD}{line}{C.RESET}")
     sub1 = "[ VULNERABILITY DETECTION & SECURITY AUDIT TOOL ]"
     sub2 = f"Linux  ·  CLI  ·  Python3  ·  v{VERSION}"
-    sub3 = "Designed for Ethical Hacking & Defensive Security"
+    sub3 = "Designed by Devincy Damai for Ethical Hacking & Defensive Security"
     print(f"{'':>{(w-len(sub1))//2}}{C.CYAN}{C.BOLD}{sub1}{C.RESET}")
     print(f"{'':>{(w-len(sub2))//2}}{C.GREY}{sub2}{C.RESET}")
     print(f"{'':>{(w-len(sub3))//2}}{C.YELLOW}{sub3}{C.RESET}")
