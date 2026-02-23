@@ -10,6 +10,8 @@
 ```
 
 **Outil de détection et analyse de vulnérabilités — Linux CLI**  
+ Developed by Damai Devincy
+
 Version 1.0.3 — Compatible Kali Linux · Ubuntu · Debian
 
 ---
