@@ -40,7 +40,7 @@ def banner():
 def banner_compact():
     w = _tw()
     print(f"\n{C.CYAN}{C.BOLD}{'─'*w}{C.RESET}")
-    print(f"{C.CYAN}{C.BOLD}  🔐  NETGUARD v{VERSION}  |  Vulnerability Detection Tool{C.RESET}")
+    print(f"{C.CYAN}{C.BOLD}  NETGUARD v{VERSION}  |  Vulnerability Detection Tool{C.RESET}")
     print(f"{C.CYAN}{C.BOLD}{'─'*w}{C.RESET}\n")
 
 def print_help_full():
